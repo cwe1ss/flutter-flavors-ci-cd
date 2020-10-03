@@ -1,7 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-void main() {
+import 'flavor_settings.dart';
+
+Future<void> main() async {
+  // NOTE: This is required for accessing the method channel before runApp().
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final settings = await _getFlavorSettings();
+  print('API URL ${settings.apiBaseUrl}');
+
   runApp(MyApp());
+}
+
+Future<FlavorSettings> _getFlavorSettings() async {
+  String flavor =
+      await const MethodChannel('flavor').invokeMethod<String>('getFlavor');
+
+  print('STARTED WITH FLAVOR $flavor');
+
+  if (flavor == 'dev') {
+    return FlavorSettings.dev();
+  } else if (flavor == 'live') {
+    return FlavorSettings.live();
+  } else {
+    throw Exception("Unknown flavor: $flavor");
+  }
 }
 
 class MyApp extends StatelessWidget {
